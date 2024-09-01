@@ -1,0 +1,146 @@
+        -:    0:Source:Graph.cpp
+        -:    1:
+        -:    2:#include "Graph.hpp"
+        -:    3:#include <iostream>
+        -:    4:#include <stack>
+        -:    5:
+        6:    6:Graph::Graph(int vertices) : V(vertices), adj(vertices) {}
+        -:    7:
+    10010:    8:void Graph::addEdge(int u, int v)
+        -:    9:{
+    10010:   10:    adj[u][v]++;
+    10010:   11:    if (u != v)
+        -:   12:    {
+    10010:   13:        adj[v][u]++;
+        -:   14:    }
+    10010:   15:}
+        -:   16:
+    20152:   17:bool Graph::existsEdge(int u, int v) const
+        -:   18:{
+    20152:   19:    if (u < 0 || u >= V || v < 0 || v >= V)
+        -:   20:    {
+    #####:   21:        return false; // Invalid vertex
+        -:   22:    }
+    20152:   23:    return adj[u].find(v) != adj[u].end();
+        -:   24:}
+        -:   25:
+    #####:   26:int Graph::getEdgeCount(int u, int v) const
+        -:   27:{
+    #####:   28:    if (!existsEdge(u, v))
+        -:   29:    {
+    #####:   30:        return 0;
+        -:   31:    }
+    #####:   32:    return adj[u].at(v);
+        -:   33:}
+        -:   34:
+        3:   35:bool Graph::isEulerianCircuit() const
+        -:   36:{
+       15:   37:    for (const auto &edges : adj)
+        -:   38:    {
+       13:   39:        int degree = 0;
+      122:   40:        for (const auto &[_, count] : edges)
+        -:   41:        {
+      109:   42:            degree += count;
+        -:   43:        }
+       13:   44:        if (degree % 2 != 0)
+        -:   45:        {
+        1:   46:            return false;
+        -:   47:        }
+        -:   48:    }
+        2:   49:    return isConnected();
+        -:   50:}
+        -:   51:
+       10:   52:void Graph::dfs(int v, std::vector<bool> &visited) const
+        -:   53:{
+       10:   54:    visited[v] = true;
+       50:   55:    for (const auto &[neighbor, _] : adj[v])
+        -:   56:    {
+       40:   57:        if (!visited[neighbor])
+        -:   58:        {
+        8:   59:            dfs(neighbor, visited);
+        -:   60:        }
+        -:   61:    }
+       10:   62:}
+        -:   63:
+        2:   64:bool Graph::isConnected() const
+        -:   65:{
+        2:   66:    std::vector<bool> visited(V, false);
+        -:   67:    int i;
+       2*:   68:    for (i = 0; i < V; i++)
+        -:   69:    {
+        2:   70:        if (!adj[i].empty())
+        -:   71:        {
+        2:   72:            break;
+        -:   73:        }
+        -:   74:    }
+        2:   75:    if (i == V)
+    #####:   76:        return true;
+        2:   77:    dfs(i, visited);
+       12:   78:    for (i = 0; i < V; i++)
+        -:   79:    {
+      10*:   80:        if (!visited[i] && !adj[i].empty())
+        -:   81:        {
+    #####:   82:            return false;
+        -:   83:        }
+        -:   84:    }
+        2:   85:    return true;
+        2:   86:}
+        -:   87:
+        1:   88:std::vector<int> Graph::findEulerianCircuit() const
+        -:   89:{
+        1:   90:    if (!isEulerianCircuit())
+        -:   91:    {
+    #####:   92:        return {};
+        -:   93:    }
+        -:   94:
+        1:   95:    std::vector<std::unordered_map<int, int>> adj_copy = adj;
+        1:   96:    std::vector<int> circuit;
+        1:   97:    std::stack<int> stack;
+        1:   98:    int current = 0;
+        -:   99:
+        1:  100:    stack.push(current);
+       22:  101:    while (!stack.empty())
+        -:  102:    {
+       21:  103:        if (!adj_copy[current].empty())
+        -:  104:        {
+       10:  105:            stack.push(current);
+       10:  106:            int next = adj_copy[current].begin()->first;
+       10:  107:            if (--adj_copy[current][next] == 0)
+        -:  108:            {
+       10:  109:                adj_copy[current].erase(next);
+        -:  110:            }
+       10:  111:            if (current != next)
+        -:  112:            {
+       10:  113:                if (--adj_copy[next][current] == 0)
+        -:  114:                {
+       10:  115:                    adj_copy[next].erase(current);
+        -:  116:                }
+        -:  117:            }
+       10:  118:            current = next;
+        -:  119:        }
+        -:  120:        else
+        -:  121:        {
+       11:  122:            circuit.push_back(current);
+       11:  123:            current = stack.top();
+       11:  124:            stack.pop();
+        -:  125:        }
+        -:  126:    }
+        -:  127:
+        1:  128:    return circuit;
+        1:  129:}
+        -:  130:
+        2:  131:void Graph::printGraph() const
+        -:  132:{
+     1007:  133:    for (int i = 0; i < V; i++)
+        -:  134:    {
+     1005:  135:        std::cout << i << ": ";
+    21025:  136:        for (const auto &[neighbor, count] : adj[i])
+        -:  137:        {
+    40040:  138:            for (int j = 0; j < count; j++)
+        -:  139:            {
+    20020:  140:                std::cout << neighbor << " ";
+        -:  141:            }
+        -:  142:        }
+     1005:  143:        std::cout << std::endl;
+        -:  144:    }
+        2:  145:}

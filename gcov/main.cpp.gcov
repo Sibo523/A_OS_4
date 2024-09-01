@@ -1,0 +1,83 @@
+        -:    0:Source:main.cpp
+        -:    1:
+        -:    2:#include <iostream>
+        -:    3:#include <random>
+        -:    4:#include <unistd.h>
+        -:    5:#include "Graph.hpp"
+        -:    6:
+        2:    7:void generateRandomGraph(Graph &g, int numVertices, int numEdges, unsigned seed)
+        -:    8:{
+        2:    9:    std::mt19937 gen(seed);
+        2:   10:    std::uniform_int_distribution<> dis(0, numVertices - 1);
+        -:   11:
+    10136:   12:    for (int i = 0; i < numEdges; ++i)
+        -:   13:    {
+    10134:   14:        int u = dis(gen);
+    10134:   15:        int v = dis(gen);
+    10134:   16:        if (g.existsEdge(u, v) || g.existsEdge(v, u) || u == v)
+        -:   17:        {
+      124:   18:            i--;
+      124:   19:            continue;
+        -:   20:        }
+    10010:   21:        std::cout << u << " " << v << std::endl;
+    10010:   22:        g.addEdge(u, v);
+        -:   23:    }
+        -:   24:
+        2:   25:    std::cout << "Generated graph structure:" << std::endl;
+        2:   26:    g.printGraph();
+        2:   27:}
+        -:   28:
+        2:   29:int main(int argc, char *argv[])
+        -:   30:{
+        2:   31:    int numVertices = 0, numEdges = 0;
+        2:   32:    unsigned seed = 0;
+        -:   33:    int opt;
+        -:   34:
+        8:   35:    while ((opt = getopt(argc, argv, "v:e:s:")) != -1)
+        -:   36:    {
+        6:   37:        switch (opt)
+        -:   38:        {
+        2:   39:        case 'v':
+        2:   40:            numVertices = std::stoi(optarg);
+        2:   41:            break;
+        2:   42:        case 'e':
+        2:   43:            numEdges = std::stoi(optarg);
+        2:   44:            break;
+        2:   45:        case 's':
+        2:   46:            seed = std::stoul(optarg);
+        2:   47:            break;
+    #####:   48:        default:
+    #####:   49:            std::cerr << "Usage: " << argv[0] << " -v <vertices> -e <edges> -s <seed>" << std::endl;
+    #####:   50:            return 1;
+        -:   51:        }
+        -:   52:    }
+        -:   53:
+        2:   54:    if (numVertices <= 0 || numEdges < numVertices)
+        -:   55:    {
+    #####:   56:        std::cerr << "Invalid number of vertices or edges. Ensure vertices > 0 and edges >= vertices." << std::endl;
+    #####:   57:        return 1;
+        -:   58:    }
+        -:   59:
+        2:   60:    Graph g(numVertices);
+        2:   61:    generateRandomGraph(g, numVertices, numEdges, seed);
+        -:   62:
+        2:   63:    std::cout << "Generated random graph with " << numVertices << " vertices and " << numEdges << " edges." << std::endl;
+        -:   64:
+        2:   65:    if (g.isEulerianCircuit())
+        -:   66:    {
+        1:   67:        std::cout << "The graph contains an Eulerian circuit." << std::endl;
+        1:   68:        std::vector<int> circuit = g.findEulerianCircuit();
+        1:   69:        std::cout << "Eulerian circuit: ";
+       12:   70:        for (int v : circuit)
+        -:   71:        {
+       11:   72:            std::cout << v << " ";
+        -:   73:        }
+        1:   74:        std::cout << std::endl;
+        1:   75:    }
+        -:   76:    else
+        -:   77:    {
+        1:   78:        std::cout << "The graph does not contain an Eulerian circuit." << std::endl;
+        -:   79:    }
+        -:   80:
+        2:   81:    return 0;
+        -:   82:}
