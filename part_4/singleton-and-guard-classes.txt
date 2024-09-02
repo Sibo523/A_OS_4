@@ -1,0 +1,36 @@
+#include <mutex>
+
+// Singleton Abstract Base Class
+class Singleton {
+protected:
+    Singleton() {}
+    virtual ~Singleton() {}
+
+public:
+    static Singleton& getInstance() {
+        static std::mutex mtx;
+        std::lock_guard<std::mutex> lock(mtx);
+
+        static Singleton instance;
+        return instance;
+    }
+
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+};
+
+// Guard (Scope Mutex) Class
+class Guard {
+public:
+    explicit Guard(std::mutex& mtx)
+        : m_mutex(mtx) {
+        m_mutex.lock();
+    }
+
+    ~Guard() {
+        m_mutex.unlock();
+    }
+
+private:
+    std::mutex& m_mutex;
+};
