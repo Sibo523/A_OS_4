@@ -1,5 +1,0 @@
-compile like This
-
-gcc -g -pthread -o my_program my_program.C
-
-valgrind --tool=helgrind ./myprogram 2> output.txt
